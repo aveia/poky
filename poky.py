@@ -36,6 +36,9 @@ def parse(code):
                 state = 'reading_number'
                 token += char
 
+            elif char == ';':
+                state = 'comment'
+
             elif char == '(':
                 new_list = []
                 stack[-1].append(new_list)
@@ -53,6 +56,11 @@ def parse(code):
 
             elif char in ' \t\n':
                 state = 'whitespace'
+                stack[-1].append(token)
+                token = ''
+
+            elif char == ';':
+                state = 'comment'
                 stack[-1].append(token)
                 token = ''
 
@@ -87,6 +95,12 @@ def parse(code):
                 stack[-1].append(value)
                 token = ''
 
+            elif char == ';':
+                state = 'comment'
+                value = float(token) if '.' in token else int(token)
+                stack[-1].append(value)
+                token = ''
+
             elif char == '(':
                 state = 'whitespace'
                 value = float(token) if '.' in token else int(token)
@@ -103,6 +117,11 @@ def parse(code):
                 token = ''
                 if len(stack) > 1:
                     stack.pop()
+
+        elif state == 'comment':
+
+            if char == '\n':
+                state = 'whitespace'
 
     return code_tree
 
