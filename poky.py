@@ -214,6 +214,13 @@ def evaluate(thing, context):
             for x in thing[1:]:
                 value = evaluate(x, context)
 
+        elif thing[0] == 'scope':
+
+            new_scope = {}
+
+            for x in thing[1:]:
+                value = evaluate(x, [new_scope] + context)
+
         elif thing[0] == 'if':
 
             args = thing[1:]
@@ -227,6 +234,16 @@ def evaluate(thing, context):
 
                 elif len(args) >= 3:
                     value = evaluate(args[2], context)
+
+        elif thing[0] == 'set!':
+
+            scope = context[0]
+            args = thing[1:]
+
+            if len(args) % 2 == 0:
+                for i in range(1, len(args), 2):
+                    if isinstance(args[i - 1], str):
+                        scope[args[i - 1]] = evaluate(args[i], context)
 
         else:
             new_list = [evaluate(x, context) for x in thing]
