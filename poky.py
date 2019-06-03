@@ -7,8 +7,9 @@ created on 2019-6-2
 '''
 
 import argparse
-from functools import reduce
+import math
 import sys
+from functools import reduce
 
 def read_file(filepath):
     with open(filepath) as f:
@@ -242,6 +243,8 @@ def interpret(tree):
 
     global_scope = {
         'pi': 3.1415926535,
+        'sqrt': math.sqrt,
+        'print': print,
         '+': _sum,
         '-': _subtract,
         '*': _multiply,
