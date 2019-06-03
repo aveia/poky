@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 '''
-pokylisp
+poky
 an experiment
 created on 2019-6-2
 '''
@@ -242,7 +242,7 @@ def interpret(tree):
 
 def main():
 
-    parser = argparse.ArgumentParser('pokylisp v0')
+    parser = argparse.ArgumentParser('poky v0')
     parser.add_argument(dest='input_file')
 
     args = parser.parse_args()

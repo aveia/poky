@@ -1,4 +1,5 @@
-# pokylisp
+# poky
+>>>>>>> f7aca57 (renamed it to poky)
 A simple lisp-like language; current features:
 
 - a laughable parser
