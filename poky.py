@@ -52,7 +52,7 @@ def parse(code):
         elif state == 'reading_symbol':
 
             if 'a' <= char <= 'z' or 'A' <= char <= 'Z' \
-                or char in '+-/*!?%<>!=':
+                or char in '+-/*!?%<>!=' or '0' <= char <= '9':
                 token += char
 
             elif char in ' \t\n':
