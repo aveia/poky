@@ -15,6 +15,12 @@ def read_file(filepath):
     with open(filepath) as f:
         return f.read()
 
+class Function:
+    def __init__(self, name, params, forms):
+        self.name = name
+        self.params = params
+        self.forms = forms
+
 def parse(code):
 
     code_tree = ['progn']
@@ -214,6 +220,18 @@ def evaluate(thing, context):
             for x in thing[1:]:
                 value = evaluate(x, context)
 
+        elif thing[0] == 'def':
+
+            scope = context[0]
+
+            args = thing[1:]
+
+            name = args[0]
+            params = args[1]
+            forms = args[2:]
+
+            scope[name] = Function(name, params, forms)
+
         elif thing[0] == 'scope':
 
             new_scope = {}
@@ -248,10 +266,18 @@ def evaluate(thing, context):
         else:
             new_list = [evaluate(x, context) for x in thing]
 
-            operator = new_list[0]
-            args = new_list[1:]
+            op = new_list[0]
+            fn_args = new_list[1:]
 
-            value = operator(*args)
+            if isinstance(op, Function):
+
+                new_scope = {}
+                for symbol, value in zip(op.params, fn_args):
+                    new_scope[symbol] = value
+
+                value = evaluate(["progn"] + op.forms, [new_scope] + context)
+            else:
+                value = op(*fn_args)
 
     print('value:', value, file=sys.stderr)
     return value

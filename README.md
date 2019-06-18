@@ -8,9 +8,10 @@ A simple lisp-like language; current features:
 - the `pi` constant typed from memory (beware)
 - `if` conditionals
 - assignments with `set!`
+- function definitions with `def`
 - lexical scopes with `scope`
 - `progn`
 
 To-do:
 
-- logical operators, lists, `defun`, et al.
+- logical operators, lists, et al.
