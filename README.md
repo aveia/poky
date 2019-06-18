@@ -1,5 +1,5 @@
 # poky
->>>>>>> f7aca57 (renamed it to poky)
+
 A simple lisp-like language; current features:
 
 - a laughable parser
@@ -14,4 +14,9 @@ A simple lisp-like language; current features:
 
 To-do:
 
-- logical operators, lists, et al.
+- logical operators
+- strings
+- lists
+- i/o
+- macros
+- et al.
