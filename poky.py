@@ -230,7 +230,7 @@ def evaluate(thing, context):
             params = args[1]
             forms = args[2:]
 
-            scope[name] = Function(name, params, forms)
+            value = scope[name] = Function(name, params, forms)
 
         elif thing[0] == 'scope':
 
