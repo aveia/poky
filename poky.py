@@ -258,10 +258,12 @@ def evaluate(thing, context):
             scope = context[0]
             args = thing[1:]
 
-            if len(args) % 2 == 0:
+            if args and len(args) % 2 == 0:
                 for i in range(1, len(args), 2):
                     if isinstance(args[i - 1], str):
                         scope[args[i - 1]] = evaluate(args[i], context)
+
+                value = args[-1]
 
         else:
             new_list = [evaluate(x, context) for x in thing]
