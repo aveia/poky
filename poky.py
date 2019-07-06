@@ -224,13 +224,18 @@ def evaluate(thing, context):
 
             scope = context[0]
 
-            args = thing[1:]
-
-            name = args[0]
-            params = args[1]
-            forms = args[2:]
+            name = thing[1]
+            params = thing[2]
+            forms = thing[3:]
 
             value = scope[name] = Function(name, params, forms)
+
+        elif thing[0] in ['lambda', 'lb']:
+
+            params = thing[1]
+            forms = thing[2:]
+
+            value = Function(None, params, forms)
 
         elif thing[0] == 'scope':
 
