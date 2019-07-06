@@ -370,7 +370,7 @@ def evaluate(thing, context):
             else:
                 value = op(*fn_args)
 
-    print('value:', value, file=sys.stderr)
+    print('value of {}:'.format(thing), value, file=sys.stderr)
     return value
 
 def interpret(tree):
