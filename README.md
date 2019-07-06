@@ -7,6 +7,7 @@ A simple lisp-like language; current features:
 - comparison operators (`>`, `>=`, `=`, `!=`, …)
 - the `pi` constant typed from memory (beware)
 - `if` conditionals
+- list functions, `cons`, `list`, `car`, `cdr`
 - assignments with `set!`
 - function definitions with `def!`
 - lexical scopes with `scope`
@@ -16,7 +17,6 @@ To-do:
 
 - logical operators
 - strings
-- lists
 - i/o
 - macros
 - et al.
