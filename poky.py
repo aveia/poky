@@ -21,6 +21,11 @@ class Function:
         self.params = params
         self.forms = forms
 
+class Cons:
+    def __init__(self, x1, x2):
+        self.x1 = x1
+        self.x2 = x2
+
 def parse(code):
 
     code_tree = ['progn']
@@ -195,6 +200,22 @@ def _not_equal(*args):
             return False
     return True
 
+def _list(*args):
+    if not args:
+        return None
+    return Cons(args[0], _list(*args[1:]))
+
+def _cons(x1, x2):
+    return Cons(x1, x2)
+
+def _car(cons):
+    return cons.x1
+
+def _cdr(cons):
+    if cons == None:
+        return None
+    return cons.x2
+
 def evaluate(thing, context):
 
     print('evaluating:', thing, file=sys.stderr)
@@ -307,6 +328,10 @@ def interpret(tree):
         '>=': _greater_equal,
         '=': _equal,
         '!=': _not_equal,
+        'list': _list,
+        'cons': _cons,
+        'car': _car,
+        'cdr': _cdr,
     }
 
     # scope list
