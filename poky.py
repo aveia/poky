@@ -48,6 +48,10 @@ def parse(code):
                 state = 'reading_number'
                 token += char
 
+            elif char == '"':
+                state = 'reading_string'
+                token += char
+
             elif char == ';':
                 state = 'comment'
 
@@ -129,6 +133,28 @@ def parse(code):
                 token = ''
                 if len(stack) > 1:
                     stack.pop()
+
+        elif state == 'reading_string':
+
+            if char == '\\':
+                state = 'reading_escape_sequence'
+            elif char == '"':
+                state = 'whitespace'
+                token += char
+                stack[-1].append(token)
+                token = ''
+            else:
+                token += char
+
+        elif state == 'reading_escape_sequence':
+
+            state = 'reading_string'
+            if char == 'n':
+                token += '\n'
+            elif char == '\n':
+                pass
+            else:
+                token += char
 
         elif state == 'comment':
 
@@ -226,10 +252,15 @@ def evaluate(thing, context):
         value = thing
 
     elif isinstance(thing, str):
-        for scope in context:
-            if thing in scope:
-                value = scope[thing]
-                break
+
+        if thing[0] == '"':
+            value = thing[1:-1]
+
+        else:
+            for scope in context:
+                if thing in scope:
+                    value = scope[thing]
+                    break
 
     elif isinstance(thing, list):
 
