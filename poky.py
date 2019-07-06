@@ -220,7 +220,7 @@ def evaluate(thing, context):
             for x in thing[1:]:
                 value = evaluate(x, context)
 
-        elif thing[0] == 'def':
+        elif thing[0] == 'def!':
 
             scope = context[0]
 
