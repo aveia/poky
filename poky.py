@@ -182,40 +182,40 @@ def _lesser(*args):
     if len(args) < 2:
         return True
     for i in range(1, len(args)):
-        if args[i - 1] >= args[i]:
-            return False
+        if not args[i - 1] < args[i]:
+            return None
     return True
 
 def _lesser_equal(*args):
     if len(args) < 2:
         return True
     for i in range(1, len(args)):
-        if args[i - 1] > args[i]:
-            return False
+        if not args[i - 1] <= args[i]:
+            return None
     return True
 
 def _greater(*args):
     if len(args) < 2:
         return True
     for i in range(1, len(args)):
-        if args[i - 1] <= args[i]:
-            return False
+        if not args[i - 1] > args[i]:
+            return None
     return True
 
 def _greater_equal(*args):
     if len(args) < 2:
         return True
     for i in range(1, len(args)):
-        if args[i - 1] < args[i]:
-            return False
+        if not args[i - 1] >= args[i]:
+            return None
     return True
 
 def _equal(*args):
     if len(args) < 2:
         return True
     for i in range(1, len(args)):
-        if args[i - 1] != args[i]:
-            return False
+        if not args[i - 1] == args[i]:
+            return None
     return True
 
 def _not_equal(*args):
@@ -223,7 +223,7 @@ def _not_equal(*args):
         return True
     for i in range(1, len(args)):
         if args[i - 1] == args[i]:
-            return False
+            return None
     return True
 
 def _list(*args):
@@ -289,6 +289,38 @@ def evaluate(thing, context):
 
             value = Function(None, params, forms)
 
+        elif thing[0] == 'and':
+
+            value = True
+
+            args = thing[1:]
+            for x in args:
+                value = evaluate(x, context)
+                if value is None:
+                    break
+
+        elif thing[0] == 'or':
+
+            args = thing[1:]
+            for x in args:
+                value = evaluate(x, context)
+                if value is not None:
+                    break
+
+        elif thing[0] == 'xor':
+
+            found = False
+
+            for x in args:
+                curr = evaluate(x, context)
+                if curr is not None:
+                    if found:
+                        value = None
+                        break
+                    else:
+                        value = curr
+                        found = True
+
         elif thing[0] == 'scope':
 
             new_scope = {}
@@ -304,7 +336,7 @@ def evaluate(thing, context):
 
                 cond = evaluate(args[0], context)
 
-                if cond:
+                if cond is not None:
                     value = evaluate(args[1], context)
 
                 elif len(args) >= 3:
@@ -363,6 +395,8 @@ def interpret(tree):
         'cons': _cons,
         'car': _car,
         'cdr': _cdr,
+        'not': lambda x: x is None or None,
+        'null?': lambda x: x is None or None,
     }
 
     # scope list

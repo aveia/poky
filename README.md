@@ -6,6 +6,7 @@ A simple lisp-like language; current features:
 - a laughable parser
 - basic math operators (`+`, `-`, `*`, `/`)
 - comparison operators (`>`, `>=`, `=`, `!=`, …)
+- logical operators (`and`, `or`, `xor`, `not`)
 - the `pi` constant typed from memory (beware)
 - strings
 - `if` conditionals
@@ -17,7 +18,6 @@ A simple lisp-like language; current features:
 
 To-do:
 
-- logical operators
 - i/o
 - macros
 - et al.
