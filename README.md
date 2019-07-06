@@ -15,9 +15,9 @@ A simple lisp-like language; current features:
 - function definitions with `def!`
 - lexical scopes with `scope`
 - `progn`
+- i/o
 
 To-do:
 
-- i/o
 - macros
 - et al.

@@ -15,11 +15,23 @@ def read_file(filepath):
     with open(filepath) as f:
         return f.read()
 
+class Symbol:
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f'<symbol:{self.name}>'
+
 class Function:
     def __init__(self, name, params, forms):
-        self.name = name
+        self.name = name or Symbol(None)
         self.params = params
         self.forms = forms
+
+    def __repr__(self):
+        name = self.name.name
+        param_names = [x.name for x in self.params]
+        return f'<function:({" ".join([name or "nil"] + param_names)})>'
 
 class Cons:
     def __init__(self, x1, x2):
@@ -28,7 +40,7 @@ class Cons:
 
 def parse(code):
 
-    code_tree = ['progn']
+    code_tree = [Symbol('progn')]
 
     stack = [code_tree]
 
@@ -50,7 +62,6 @@ def parse(code):
 
             elif char == '"':
                 state = 'reading_string'
-                token += char
 
             elif char == ';':
                 state = 'comment'
@@ -72,17 +83,20 @@ def parse(code):
 
             elif char in ' \t\n':
                 state = 'whitespace'
-                stack[-1].append(token)
+                symbol = Symbol(token)
+                stack[-1].append(symbol)
                 token = ''
 
             elif char == ';':
                 state = 'comment'
-                stack[-1].append(token)
+                symbol = Symbol(token)
+                stack[-1].append(symbol)
                 token = ''
 
             elif char == '(':
                 state = 'whitespace'
-                stack[-1].append(token)
+                symbol = Symbol(token)
+                stack[-1].append(symbol)
                 token = ''
                 new_list = []
                 stack[-1].append(new_list)
@@ -90,7 +104,8 @@ def parse(code):
 
             elif char == ')':
                 state = 'whitespace'
-                stack[-1].append(token)
+                symbol = Symbol(token)
+                stack[-1].append(symbol)
                 token = ''
                 if len(stack) > 1:
                     stack.pop()
@@ -140,7 +155,6 @@ def parse(code):
                 state = 'reading_escape_sequence'
             elif char == '"':
                 state = 'whitespace'
-                token += char
                 stack[-1].append(token)
                 token = ''
             else:
@@ -242,37 +256,46 @@ def _cdr(cons):
         return None
     return cons.x2
 
+def _read_token():
+    token = ''
+    char = sys.stdin.read(1)
+    while char not in '\t\n ':
+        token += char
+        char = sys.stdin.read(1)
+    return token
+
 def evaluate(thing, context):
 
     print('evaluating:', thing, file=sys.stderr)
 
     value = None
 
-    if isinstance(thing, (int, float)):
+    if isinstance(thing, (int, float, str)):
         value = thing
 
-    elif isinstance(thing, str):
+    elif isinstance(thing, Symbol):
 
-        if thing[0] == '"':
-            value = thing[1:-1]
-
-        else:
-            for scope in context:
-                if thing in scope:
-                    value = scope[thing]
-                    break
+        for scope in context:
+            if thing.name in scope:
+                value = scope[thing.name]
+                break
 
     elif isinstance(thing, list):
 
         if not thing:
+            print('uee')
             pass
 
-        elif thing[0] == 'progn':
+        elif not isinstance(thing[0], Symbol):
+            print(type(thing[0]))
+            pass
+
+        elif thing[0].name == 'progn':
 
             for x in thing[1:]:
                 value = evaluate(x, context)
 
-        elif thing[0] == 'def!':
+        elif thing[0].name == 'def!':
 
             scope = context[0]
 
@@ -280,16 +303,16 @@ def evaluate(thing, context):
             params = thing[2]
             forms = thing[3:]
 
-            value = scope[name] = Function(name, params, forms)
+            value = scope[name.name] = Function(name, params, forms)
 
-        elif thing[0] in ['lambda', 'lb']:
+        elif thing[0].name in ['lambda', 'lb']:
 
             params = thing[1]
             forms = thing[2:]
 
             value = Function(None, params, forms)
 
-        elif thing[0] == 'and':
+        elif thing[0].name == 'and':
 
             value = True
 
@@ -299,7 +322,7 @@ def evaluate(thing, context):
                 if value is None:
                     break
 
-        elif thing[0] == 'or':
+        elif thing[0].name == 'or':
 
             args = thing[1:]
             for x in args:
@@ -307,7 +330,7 @@ def evaluate(thing, context):
                 if value is not None:
                     break
 
-        elif thing[0] == 'xor':
+        elif thing[0].name == 'xor':
 
             found = False
 
@@ -321,14 +344,14 @@ def evaluate(thing, context):
                         value = curr
                         found = True
 
-        elif thing[0] == 'scope':
+        elif thing[0].name == 'scope':
 
             new_scope = {}
 
             for x in thing[1:]:
                 value = evaluate(x, [new_scope] + context)
 
-        elif thing[0] == 'if':
+        elif thing[0].name == 'if':
 
             args = thing[1:]
 
@@ -342,7 +365,7 @@ def evaluate(thing, context):
                 elif len(args) >= 3:
                     value = evaluate(args[2], context)
 
-        elif thing[0] == 'set!':
+        elif thing[0].name == 'set!':
 
             scope = context[0]
             args = thing[1:]
@@ -350,7 +373,7 @@ def evaluate(thing, context):
             if args and len(args) % 2 == 0:
                 for i in range(1, len(args), 2):
                     if isinstance(args[i - 1], str):
-                        scope[args[i - 1]] = evaluate(args[i], context)
+                        scope[args[i - 1].name] = evaluate(args[i], context)
 
                 value = args[-1]
 
@@ -364,9 +387,11 @@ def evaluate(thing, context):
 
                 new_scope = {}
                 for symbol, value in zip(op.params, fn_args):
-                    new_scope[symbol] = value
+                    new_scope[symbol.name] = value
 
-                value = evaluate(["progn"] + op.forms, [new_scope] + context)
+                value = evaluate(
+                    [Symbol('progn')] + op.forms,
+                    [new_scope] + context)
             else:
                 value = op(*fn_args)
 
@@ -381,6 +406,12 @@ def interpret(tree):
         'pi': 3.1415926535,
         'sqrt': math.sqrt,
         'print': print,
+        'read-char': lambda: sys.stdin.read(1),
+        'read-token': _read_token,
+        'read-line': lambda: sys.stdin.readline(),
+        'to-integer': int,
+        'to-float': float,
+        'to-string': str,
         '+': _sum,
         '-': _subtract,
         '*': _multiply,
