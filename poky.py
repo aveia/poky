@@ -292,6 +292,8 @@ def evaluate(thing, context):
 def interpret(tree):
 
     global_scope = {
+        't': True,
+        'nil': None,
         'pi': 3.1415926535,
         'sqrt': math.sqrt,
         'print': print,
