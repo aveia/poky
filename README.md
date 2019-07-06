@@ -2,6 +2,7 @@
 
 A simple lisp-like language; current features:
 
+- lisp-1
 - a laughable parser
 - basic math operators (`+`, `-`, `*`, `/`)
 - comparison operators (`>`, `>=`, `=`, `!=`, …)
