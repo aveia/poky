@@ -264,9 +264,10 @@ def _read_token():
         char = sys.stdin.read(1)
     return token
 
-def evaluate(thing, context):
+def evaluate(thing, context, debug):
 
-    print('evaluating:', thing, file=sys.stderr)
+    if debug:
+        print('evaluating:', thing, file=sys.stderr)
 
     value = None
 
@@ -293,7 +294,7 @@ def evaluate(thing, context):
         elif thing[0].name == 'progn':
 
             for x in thing[1:]:
-                value = evaluate(x, context)
+                value = evaluate(x, context, debug)
 
         elif thing[0].name == 'def!':
 
@@ -318,7 +319,7 @@ def evaluate(thing, context):
 
             args = thing[1:]
             for x in args:
-                value = evaluate(x, context)
+                value = evaluate(x, context, debug)
                 if value is None:
                     break
 
@@ -326,7 +327,7 @@ def evaluate(thing, context):
 
             args = thing[1:]
             for x in args:
-                value = evaluate(x, context)
+                value = evaluate(x, context, debug)
                 if value is not None:
                     break
 
@@ -335,7 +336,7 @@ def evaluate(thing, context):
             found = False
 
             for x in args:
-                curr = evaluate(x, context)
+                curr = evaluate(x, context, debug)
                 if curr is not None:
                     if found:
                         value = None
@@ -349,7 +350,7 @@ def evaluate(thing, context):
             new_scope = {}
 
             for x in thing[1:]:
-                value = evaluate(x, [new_scope] + context)
+                value = evaluate(x, [new_scope] + context, debug)
 
         elif thing[0].name == 'if':
 
@@ -357,13 +358,13 @@ def evaluate(thing, context):
 
             if len(args) >= 2:
 
-                cond = evaluate(args[0], context)
+                cond = evaluate(args[0], context, debug)
 
                 if cond is not None:
-                    value = evaluate(args[1], context)
+                    value = evaluate(args[1], context, debug)
 
                 elif len(args) >= 3:
-                    value = evaluate(args[2], context)
+                    value = evaluate(args[2], context, debug)
 
         elif thing[0].name == 'set!':
 
@@ -373,12 +374,13 @@ def evaluate(thing, context):
             if args and len(args) % 2 == 0:
                 for i in range(1, len(args), 2):
                     if isinstance(args[i - 1], str):
-                        scope[args[i - 1].name] = evaluate(args[i], context)
+                        scope[args[i - 1].name] = \
+                            evaluate(args[i], context, debug)
 
                 value = args[-1]
 
         else:
-            new_list = [evaluate(x, context) for x in thing]
+            new_list = [evaluate(x, context, debug) for x in thing]
 
             op = new_list[0]
             fn_args = new_list[1:]
@@ -391,14 +393,16 @@ def evaluate(thing, context):
 
                 value = evaluate(
                     [Symbol('progn')] + op.forms,
-                    [new_scope] + context)
+                    [new_scope] + context, debug)
             else:
                 value = op(*fn_args)
 
-    print('value of {}:'.format(thing), value, file=sys.stderr)
+    if debug:
+        print('value of {}:'.format(thing), value, file=sys.stderr)
+
     return value
 
-def interpret(tree):
+def interpret(tree, debug):
 
     global_scope = {
         't': True,
@@ -433,12 +437,14 @@ def interpret(tree):
     # scope list
     context = [global_scope]
 
-    return evaluate(tree, context)
+    return evaluate(tree, context, debug)
 
 def main():
 
     parser = argparse.ArgumentParser('poky v0')
     parser.add_argument(dest='input_file')
+    parser.add_argument('-d', '--debug',
+        dest='debug', action='store_true', default=False)
 
     args = parser.parse_args()
 
@@ -446,9 +452,7 @@ def main():
 
     code_tree = parse(code)
 
-    result = interpret(code_tree)
-
-    print('result:', result)
+    interpret(code_tree, args.debug)
 
 if __name__ == '__main__':
     main()
