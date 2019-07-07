@@ -373,7 +373,7 @@ def evaluate(thing, context, debug):
 
             if args and len(args) % 2 == 0:
                 for i in range(1, len(args), 2):
-                    if isinstance(args[i - 1], str):
+                    if isinstance(args[i - 1], Symbol):
                         scope[args[i - 1].name] = \
                             evaluate(args[i], context, debug)
 
