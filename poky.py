@@ -421,6 +421,8 @@ def interpret(tree, debug):
         '-': _subtract,
         '*': _multiply,
         '/': _divide,
+        'div': lambda x, y: x // y,
+        'mod': lambda x, y: x % y,
         '<': _lesser,
         '<=': _lesser_equal,
         '>': _greater,
