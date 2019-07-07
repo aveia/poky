@@ -284,19 +284,14 @@ def evaluate(thing, context, debug):
     elif isinstance(thing, list):
 
         if not thing:
-            print('uee')
             pass
 
-        elif not isinstance(thing[0], Symbol):
-            print(type(thing[0]))
-            pass
-
-        elif thing[0].name == 'progn':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'progn':
 
             for x in thing[1:]:
                 value = evaluate(x, context, debug)
 
-        elif thing[0].name == 'def!':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'def!':
 
             scope = context[0]
 
@@ -306,14 +301,15 @@ def evaluate(thing, context, debug):
 
             value = scope[name.name] = Function(name, params, forms)
 
-        elif thing[0].name in ['lambda', 'lb']:
+        elif isinstance(thing[0], Symbol) \
+            and thing[0].name in ['lambda', 'lb']:
 
             params = thing[1]
             forms = thing[2:]
 
             value = Function(None, params, forms)
 
-        elif thing[0].name == 'and':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'and':
 
             value = True
 
@@ -323,7 +319,7 @@ def evaluate(thing, context, debug):
                 if value is None:
                     break
 
-        elif thing[0].name == 'or':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'or':
 
             args = thing[1:]
             for x in args:
@@ -331,7 +327,7 @@ def evaluate(thing, context, debug):
                 if value is not None:
                     break
 
-        elif thing[0].name == 'xor':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'xor':
 
             found = False
 
@@ -345,14 +341,14 @@ def evaluate(thing, context, debug):
                         value = curr
                         found = True
 
-        elif thing[0].name == 'scope':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'scope':
 
             new_scope = {}
 
             for x in thing[1:]:
                 value = evaluate(x, [new_scope] + context, debug)
 
-        elif thing[0].name == 'if':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'if':
 
             args = thing[1:]
 
@@ -366,7 +362,7 @@ def evaluate(thing, context, debug):
                 elif len(args) >= 3:
                     value = evaluate(args[2], context, debug)
 
-        elif thing[0].name == 'set!':
+        elif isinstance(thing[0], Symbol) and thing[0].name == 'set!':
 
             scope = context[0]
             args = thing[1:]
