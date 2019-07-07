@@ -264,6 +264,10 @@ def _read_token():
         char = sys.stdin.read(1)
     return token
 
+def _print(*args):
+    print(*args, end='')
+    sys.stdout.flush()
+
 def evaluate(thing, context, debug):
 
     if debug:
@@ -405,7 +409,8 @@ def interpret(tree, debug):
         'nil': None,
         'pi': 3.1415926535,
         'sqrt': math.sqrt,
-        'print': print,
+        'print': _print,
+        'println': print,
         'read-char': lambda: sys.stdin.read(1),
         'read-token': _read_token,
         'read-line': lambda: sys.stdin.readline(),
