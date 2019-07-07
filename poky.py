@@ -11,6 +11,10 @@ import math
 import sys
 from functools import reduce
 
+def error(*args):
+    print(*args, file=sys.stderr)
+    sys.exit(1)
+
 def read_file(filepath):
     with open(filepath) as f:
         return f.read()
@@ -38,6 +42,21 @@ class Cons:
         self.x1 = x1
         self.x2 = x2
 
+    def __repr__(self):
+        s = '('
+        cur = self.x1
+        nxt = self.x2
+        while type(nxt) is Cons:
+            s += repr(cur) + ' '
+            cur = nxt.x1
+            nxt = nxt.x2
+        if nxt is None:
+            s += repr(cur)
+        else:
+            s += repr(cur) + ' . ' + repr(nxt)
+        s += ')'
+        return s
+
 def parse(code):
 
     code_tree = [Symbol('progn')]
@@ -47,7 +66,11 @@ def parse(code):
     state = 'whitespace'
     token = ''
 
+    last_char = None
+
     for char in code:
+
+        last_char = char
 
         if state == 'whitespace':
 
@@ -74,6 +97,11 @@ def parse(code):
             elif char == ')':
                 if len(stack) > 1:
                     stack.pop()
+                else:
+                    error('Unexpected closing parenthesis')
+
+            elif char not in ' \t\n':
+                error('Unexpected character: "{}"'.format(char))
 
         elif state == 'reading_symbol':
 
@@ -109,6 +137,11 @@ def parse(code):
                 token = ''
                 if len(stack) > 1:
                     stack.pop()
+                else:
+                    error('Unexpected closing parenthesis')
+
+            else:
+                error('Unexpected character: "{}"'.format(char))
 
         elif state == 'reading_number':
 
@@ -149,6 +182,9 @@ def parse(code):
                 if len(stack) > 1:
                     stack.pop()
 
+            else:
+                error('Unexpected character: "{}"'.format(char))
+
         elif state == 'reading_string':
 
             if char == '\\':
@@ -174,6 +210,23 @@ def parse(code):
 
             if char == '\n':
                 state = 'whitespace'
+
+    if len(stack) > 1:
+        error('Unexpected end-of-file: perhaps there are missing parenthesis '
+            'at the end')
+
+    if state == 'reading_string':
+        error('Unexpected end-of-file: perhaps there is a missing closing '
+            'double quote at the end')
+
+    if token:
+        if state == 'reading_symbol':
+            stack[-1].append(Symbol(token))
+        elif state == 'reading_number':
+            stack[-1].append(float(token) if '.' in token else int(token))
+
+    if last_char != '\n':
+        print('Warning: file does not end in a newline', file=sys.stderr)
 
     return code_tree
 
@@ -280,10 +333,16 @@ def evaluate(thing, context, debug):
 
     elif isinstance(thing, Symbol):
 
+        found = False
+
         for scope in context:
             if thing.name in scope:
                 value = scope[thing.name]
+                found = True
                 break
+
+        if not found:
+            error('Undeclared variable: "{}"'.format(thing.name))
 
     elif isinstance(thing, list):
 
