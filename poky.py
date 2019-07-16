@@ -19,6 +19,11 @@ def read_file(filepath):
     with open(filepath) as f:
         return f.read()
 
+def to_list(x):
+    if not isinstance(x, list):
+        return [x]
+    return x
+
 class Symbol:
     def __init__(self, name):
         self.name = name
@@ -370,7 +375,7 @@ def evaluate(thing, context, debug):
         elif isinstance(thing[0], Symbol) \
             and thing[0].name in ['lambda', 'lb']:
 
-            params = thing[1]
+            params = to_list(thing[1])
             forms = thing[2:]
 
             value = Function(None, params, forms)
