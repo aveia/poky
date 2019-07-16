@@ -318,8 +318,11 @@ def _read_token():
     return token
 
 def _print(*args):
-    print(*args, end='')
+    print(*args, sep='', end='')
     sys.stdout.flush()
+
+def _println(*args):
+    print(*args, sep='')
 
 def evaluate(thing, context, debug):
 
@@ -469,7 +472,7 @@ def interpret(tree, debug):
         'pi': 3.1415926535,
         'sqrt': math.sqrt,
         'print': _print,
-        'println': print,
+        'println': _println,
         'read-char': lambda: sys.stdin.read(1),
         'read-token': _read_token,
         'read-line': lambda: sys.stdin.readline(),
